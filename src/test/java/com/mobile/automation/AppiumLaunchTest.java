@@ -36,47 +36,78 @@ public class AppiumLaunchTest {
     @Test
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
         
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        
-        // 🌟 STEP 1: Android 14 Older Version Warning Popup Bypass
+        // 🔥 STAGE 1: Handle "Continue" Alert Popup
         try {
-            System.out.println("🔍 Checking if older version warning popup exists...");
-            WebElement alertButton = wait.until(
+            System.out.println("🔍 Checking for 'Continue' compatibility popup...");
+            WebElement continueBtn = wait.until(
                 ExpectedConditions.presenceOfElementLocated(
                     AppiumBy.androidUIAutomator("new UiSelector().textContains(\"Continue\")")
                 )
             );
-            alertButton.click();
-            System.out.println("✅ Popup Bypassed: Clicked on 'Continue' button successfully!");
+            continueBtn.click();
+            System.out.println("✅ 'Continue' button clicked!");
+            Thread.sleep(2000);
         } catch (Exception e) {
-            System.out.println("ℹ️ Older version popup nahi aaya, directly proceeding to main dashboard.");
+            System.out.println("ℹ️ No 'Continue' popup visible.");
         }
 
-        // 🌟 STEP 2: Pure Cache Purge & DOM Reset Hack
+        // 🔥 STAGE 2: Handle Subsequent "OK" Warning Popup
         try {
-            System.out.println("⏳ Forcing Appium to clear stale UI cache...");
-            Thread.sleep(3000);
-            
-            // 🔄 Yeh line Appium driver ka pura layout cache force-refresh kar degi!
-            String dump = driver.getPageSource(); 
-            System.out.println("🔄 DOM Layout Cache completely refreshed! (XML Size: " + dump.length() + " chars)");
+            System.out.println("🔍 Checking for secondary 'OK' dialog block...");
+            WebElement okBtn = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                    AppiumBy.androidUIAutomator("new UiSelector().text(\"OK\")")
+                )
+            );
+            okBtn.click();
+            System.out.println("✅ Secondary 'OK' button cleared!");
+            Thread.sleep(2000);
         } catch (Exception e) {
-            System.out.println("⚠️ Cache refresh failed, attempting selector anyway...");
+            System.out.println("ℹ️ No secondary 'OK' popup visible.");
         }
 
-        // 🌟 STEP 3: Main Dashboard - Target Views
-        System.out.println("🔄 Locating 'Views' element now...");
+        // 🔥 STAGE 3: Clear Stale Cache & Refresh Layout Tree
+        try {
+            driver.getPageSource();
+            System.out.println("🔄 Layout tree refreshed completely.");
+        } catch (Exception e) {
+            // Ignore cache error
+        }
+
+        // 🔥 STAGE 4: Click 'Views' with Fail-Safe Fallbacks
+        System.out.println("🔄 Locating 'Views' element...");
+        WebElement viewsElement = null;
         
-        WebElement viewsElement = wait.until(
-            ExpectedConditions.presenceOfElementLocated(
-                AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
-            )
-        );
+        try {
+            // Fallback 1: Direct native text strategy
+            viewsElement = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                    AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
+                )
+            );
+        } catch (Exception e1) {
+            System.out.println("⚠️ Direct strategy failed. Triggering UiScrollable automation engine scan...");
+            try {
+                // Fallback 2: Deep layout scroll-to-view search mapping (Ye device ko refresh hone par majboor karega)
+                viewsElement = driver.findElement(
+                    AppiumBy.androidUIAutomator(
+                        "new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text(\"Views\"))"
+                    )
+                );
+            } catch (Exception e2) {
+                System.out.println("⚠️ Scroll search failed. Attempting classic text-based XPath as last resort...");
+                // Fallback 3: Standard Native text XPath
+                viewsElement = wait.until(
+                    ExpectedConditions.elementToBeClickable(AppiumBy.xpath("//android.widget.TextView[@text='Views']"))
+                );
+            }
+        }
         
-        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element blank mila.");
+        Assert.assertNotNull(viewsElement, "❌ Failure: All fail-safe element strategies exhausted.");
         viewsElement.click();
-        System.out.println("🎉 SUCCESS: Cache tod kar 'Views' successfully click ho gaya!");
+        System.out.println("🎉 SUCCESS: Master strategies matched! 'Views' directory is now open!");
     }
 
     @AfterClass
