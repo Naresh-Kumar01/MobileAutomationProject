@@ -2,8 +2,13 @@ package com.mobile.automation;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.options.UiAutomator2Options;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -21,12 +26,8 @@ public class AppiumLaunchTest {
         options.setPlatformName("Android");
         options.setDeviceName("emulator-5554");
         options.setAutomationName("UiAutomator2");
-        
-        // App Package aur Activity name config
         options.setAppPackage("io.appium.android.apis");
         options.setAppActivity("io.appium.android.apis.ApiDemos");
-        
-        // 🌟 Yeh line future ke liye permissions apne aap grant karegi
         options.setAutoGrantPermissions(true);
 
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
@@ -36,10 +37,19 @@ public class AppiumLaunchTest {
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
         
-        // Ek chota sa check lagate hain ki dashboard load hua ya nahi
-        boolean isDisplaying = driver.getPageSource().contains("Views");
-        Assert.assertTrue(isDisplaying, "Dashboard loaded successfully!");
-        System.out.println("✅ Verification Successful: 'Views' list element screen par present hai!");
+        // 🌟 Explicit Wait: Max 10 seconds tak wait karega jab tak 'Views' element dikh nahi jata
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        
+        // Accessibility ID ya Text locator se element dhundhna sabse best hota hai
+        WebElement viewsElement = wait.until(
+            ExpectedConditions.visibilityOfElementLocated(AppiumBy.accessibilityId("Views"))
+        );
+        
+        // Verification Assertions
+        Assert.assertNotNull(viewsElement, "Dashboard load nahi hua, Views element missing hai!");
+        Assert.assertTrue(viewsElement.isDisplayed(), "Views element screen par visible nahi hai!");
+        
+        System.out.println("✅ Verification Successful: 'Views' list element dhundh liya aur verify kar liya!");
     }
 
     @AfterClass
