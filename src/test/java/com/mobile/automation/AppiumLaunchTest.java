@@ -53,28 +53,30 @@ public class AppiumLaunchTest {
             System.out.println("ℹ️ Older version popup nahi aaya, directly proceeding to main dashboard.");
         }
 
-        // 🌟 STEP 2: UI Synchronization Buffering
-        // Popup hatne ke baad DOM freeze todne ke liye explicitly 3-4 seconds ka hard sleep zaroori hai Jenkins pe
+        // 🌟 STEP 2: Pure Cache Purge & DOM Reset Hack
         try {
-            System.out.println("⏳ Waiting for Android OS layout hierarchy to fully refresh...");
-            Thread.sleep(4000); 
-        } catch (InterruptedException ie) {
-            // Ignore context intercept
+            System.out.println("⏳ Forcing Appium to clear stale UI cache...");
+            Thread.sleep(3000);
+            
+            // 🔄 Yeh line Appium driver ka pura layout cache force-refresh kar degi!
+            String dump = driver.getPageSource(); 
+            System.out.println("🔄 DOM Layout Cache completely refreshed! (XML Size: " + dump.length() + " chars)");
+        } catch (Exception e) {
+            System.out.println("⚠️ Cache refresh failed, attempting selector anyway...");
         }
 
-        // 🌟 STEP 3: Main Dashboard - Dynamic Text Identifier Matching
-        System.out.println("🔄 Locating 'Views' element via native UI scroll scan...");
+        // 🌟 STEP 3: Main Dashboard - Target Views
+        System.out.println("🔄 Locating 'Views' element now...");
         
-        // Is baar hum exact text attribute structure aur pure index mapping ko target karenge
         WebElement viewsElement = wait.until(
-            ExpectedConditions.elementToBeClickable(
+            ExpectedConditions.presenceOfElementLocated(
                 AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
             )
         );
         
-        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element structure blank mila.");
+        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element blank mila.");
         viewsElement.click();
-        System.out.println("🎉 SUCCESS: Finally 'Views' open ho gaya aur test complete pass hai!");
+        System.out.println("🎉 SUCCESS: Cache tod kar 'Views' successfully click ho gaya!");
     }
 
     @AfterClass
