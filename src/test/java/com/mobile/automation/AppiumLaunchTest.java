@@ -34,6 +34,7 @@ public class AppiumLaunchTest {
     }
 
     
+   
     @Test
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
@@ -41,10 +42,10 @@ public class AppiumLaunchTest {
         // Explicit Wait config
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         
-        // 🌟 FIX: Accessibility ID hata kar Android UIAutomator ka UI Selector use kiya hai jo 'text' match karega
+        // 🌟 ULTIMATE FIX: Android native text property ko catch karne ke liye pure XPath filter use kiya hai
         WebElement viewsElement = wait.until(
             ExpectedConditions.visibilityOfElementLocated(
-                AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
+                org.openqa.selenium.By.xpath("//android.widget.TextView[@text='Views']")
             )
         );
         
@@ -52,9 +53,8 @@ public class AppiumLaunchTest {
         Assert.assertNotNull(viewsElement, "Dashboard load nahi hua, Views element missing hai!");
         Assert.assertTrue(viewsElement.isDisplayed(), "Views element screen par visible nahi hai!");
         
-        System.out.println("✅ Verification Successful: 'Views' text element dhundh liya aur verify kar liya!");
+        System.out.println("✅ Verification Successful: XPath se 'Views' element perfectly dhoondh liya gaya!");
     }
-
     @AfterClass
     public void tearDown() {
         if (driver != null) {
