@@ -28,8 +28,6 @@ public class AppiumLaunchTest {
         options.setAutomationName("UiAutomator2");
         options.setAppPackage("io.appium.android.apis");
         options.setAppActivity("io.appium.android.apis.ApiDemos");
-        
-        // Android 14 background freeze bypass karne ke liye permissions aur setup clean rakein
         options.setAutoGrantPermissions(true);
 
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
@@ -39,21 +37,36 @@ public class AppiumLaunchTest {
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
         
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
         
-        // 🌟 ULTIMATE FIX: Android Framework ka sabse hardcore text pattern scanner fallback mapping
+        // 🌟 STEP 1: Android 14 Older Version Warning Popup Bypass
+        try {
+            System.out.println("🔍 Checking if older version warning popup exists...");
+            WebElement alertButton = wait.until(
+                ExpectedConditions.presenceOfElementLocated(
+                    AppiumBy.androidUIAutomator("new UiSelector().textContains(\"Continue\")")
+                )
+            );
+            alertButton.click();
+            System.out.println("✅ Popup Bypassed: Clicked on 'Continue' button successfully!");
+            
+            // Chota sa delay taaki alert hatne ke baad screen refresh ho sake
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            System.out.println("ℹ️ Older version popup nahi aaya, directly proceeding to main dashboard.");
+        }
+
+        // 🌟 STEP 2: Main Dashboard Par 'Views' par click karna
+        System.out.println("🔄 Locating 'Views' element now...");
         WebElement viewsElement = wait.until(
             ExpectedConditions.presenceOfElementLocated(
-                AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.TextView\").textContains(\"Views\")")
+                AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
             )
         );
         
-        Assert.assertNotNull(viewsElement, "Dashboard fail: Element context engine ne release nahi kiya.");
-        System.out.println("✅ Verification Successful: 'Views' text successfully mapped on Android 14!");
-        
-        // Click karke verify karte hain ki script smooth aage chal rahi hai ya nahi
+        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element match nahi ho paya.");
         viewsElement.click();
-        System.out.println("👆 Action Performed: 'Views' folder open ho gaya!");
+        System.out.println("🎉 SUCCESS: 'Views' folder successfully opened via Automation!");
     }
 
     @AfterClass
