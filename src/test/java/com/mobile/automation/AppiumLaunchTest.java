@@ -1,54 +1,52 @@
 package com.mobile.automation;
 
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.options.UiAutomator2Options;
-import org.testng.annotations.Test; // Naya import
 import java.net.MalformedURLException;
 import java.net.URL;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.options.UiAutomator2Options;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 public class AppiumLaunchTest {
 
-    @Test // Ab yeh pure Maven test ki tarah run hoga
-    public void launchSettingsTest() {
+    AndroidDriver driver;
 
-        UiAutomator2Options options = new UiAutomator2Options()
-                .setDeviceName("emulator-5554")              
-                .setPlatformVersion("14")                    
-                .setAppPackage("com.android.settings")
-                .setAppActivity("com.android.settings.Settings");
+    @BeforeClass
+    public void setUp() throws MalformedURLException {
+        System.out.println("🚀 Appium Server se connect ho raha hai (Target: API Demos)...");
+
+        UiAutomator2Options options = new UiAutomator2Options();
+        options.setPlatformName("Android");
+        options.setDeviceName("emulator-5554");
+        options.setAutomationName("UiAutomator2");
         
-        options.setCapability("appium:androidHome", "C:\\Users\\Admin\\AppData\\Local\\Android\\Sdk");
-        options.setCapability("appium:androidInstallTimeout", 180000);
-        options.setCapability("appium:uiautomator2ServerInstallTimeout", 180000);
-        options.setCapability("appium:adbExecTimeout", 180000);
-        options.setCapability("appium:noReset", true);
-        options.setCapability("appium:ensureWebviewsHavePages", true);
+        // App Package aur Activity name config
+        options.setAppPackage("io.appium.android.apis");
+        options.setAppActivity("io.appium.android.apis.ApiDemos");
+        
+        // 🌟 Yeh line future ke liye permissions apne aap grant karegi
+        options.setAutoGrantPermissions(true);
 
-        AndroidDriver driver = null;
+        driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
+    }
 
-        try {
-            System.out.println("🚀 Appium Server se connect ho raha hai (Target: Pixel 8 Emulator)...");
-            URL serverUrl = new URL("http://127.0.0.1:4723/");
+    @Test
+    public void verifyApiDemosHomeLayout() {
+        System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
+        
+        // Ek chota sa check lagate hain ki dashboard load hua ya nahi
+        boolean isDisplaying = driver.getPageSource().contains("Views");
+        Assert.assertTrue(isDisplaying, "Dashboard loaded successfully!");
+        System.out.println("✅ Verification Successful: 'Views' list element screen par present hai!");
+    }
 
-            driver = new AndroidDriver(serverUrl, options);
-            System.out.println("🥳 Success! Pixel 8 Emulator me Settings app successfully khul gayi hai!");
-            
-            Thread.sleep(4000); 
-
-        } catch (MalformedURLException e) {
-            System.out.println("❌ URL galat hai: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("❌ Test execution me error aaya: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (driver != null) {
-                try {
-                    driver.quit();
-                    System.out.println("🛑 Driver session closed successfully.");
-                } catch (Exception e) {
-                    System.out.println("🛑 Driver close karte waqt issue aaya: " + e.getMessage());
-                }
-            }
+    @AfterClass
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+            System.out.println("🛑 Driver session closed successfully.");
         }
     }
 }
