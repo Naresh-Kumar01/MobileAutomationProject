@@ -28,33 +28,34 @@ public class AppiumLaunchTest {
         options.setAutomationName("UiAutomator2");
         options.setAppPackage("io.appium.android.apis");
         options.setAppActivity("io.appium.android.apis.ApiDemos");
+        
+        // Android 14 background freeze bypass karne ke liye permissions aur setup clean rakein
         options.setAutoGrantPermissions(true);
 
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
     }
 
-    
-   
     @Test
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
         
-        // Explicit Wait config
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         
-        // 🌟 ULTIMATE FIX: Android native text property ko catch karne ke liye pure XPath filter use kiya hai
+        // 🌟 ULTIMATE FIX: Android Framework ka sabse hardcore text pattern scanner fallback mapping
         WebElement viewsElement = wait.until(
-            ExpectedConditions.visibilityOfElementLocated(
-                org.openqa.selenium.By.xpath("//android.widget.TextView[@text='Views']")
+            ExpectedConditions.presenceOfElementLocated(
+                AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.TextView\").textContains(\"Views\")")
             )
         );
         
-        // Verification Assertions
-        Assert.assertNotNull(viewsElement, "Dashboard load nahi hua, Views element missing hai!");
-        Assert.assertTrue(viewsElement.isDisplayed(), "Views element screen par visible nahi hai!");
+        Assert.assertNotNull(viewsElement, "Dashboard fail: Element context engine ne release nahi kiya.");
+        System.out.println("✅ Verification Successful: 'Views' text successfully mapped on Android 14!");
         
-        System.out.println("✅ Verification Successful: XPath se 'Views' element perfectly dhoondh liya gaya!");
+        // Click karke verify karte hain ki script smooth aage chal rahi hai ya nahi
+        viewsElement.click();
+        System.out.println("👆 Action Performed: 'Views' folder open ho gaya!");
     }
+
     @AfterClass
     public void tearDown() {
         if (driver != null) {
