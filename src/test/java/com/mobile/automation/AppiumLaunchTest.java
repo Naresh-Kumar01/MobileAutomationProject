@@ -31,6 +31,7 @@ public class AppiumLaunchTest {
         options.setAutoGrantPermissions(true);
 
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
+      //  driver = new AndroidDriver(new URL("http://localhost:4444/wd/hub"), options);
     }
 
     @Test

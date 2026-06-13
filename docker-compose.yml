@@ -1,0 +1,15 @@
+services:
+  # Selenium Hub jo local Appium Server ko internally register karega
+  selenium-hub:
+    image: selenium/hub:4.21.0
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      - SE_RELAX_CHECKS=true
+      # Hub ko hi batayenge ki hamara local Windows Appium server kahan chal raha hai
+      - GRID_NEW_SESSION_WAIT_TIMEOUT=60
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
