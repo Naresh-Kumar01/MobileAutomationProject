@@ -33,23 +33,26 @@ public class AppiumLaunchTest {
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/"), options);
     }
 
+    
     @Test
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
         
-        // 🌟 Explicit Wait: Max 10 seconds tak wait karega jab tak 'Views' element dikh nahi jata
+        // Explicit Wait config
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         
-        // Accessibility ID ya Text locator se element dhundhna sabse best hota hai
+        // 🌟 FIX: Accessibility ID hata kar Android UIAutomator ka UI Selector use kiya hai jo 'text' match karega
         WebElement viewsElement = wait.until(
-            ExpectedConditions.visibilityOfElementLocated(AppiumBy.accessibilityId("Views"))
+            ExpectedConditions.visibilityOfElementLocated(
+                AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
+            )
         );
         
         // Verification Assertions
         Assert.assertNotNull(viewsElement, "Dashboard load nahi hua, Views element missing hai!");
         Assert.assertTrue(viewsElement.isDisplayed(), "Views element screen par visible nahi hai!");
         
-        System.out.println("✅ Verification Successful: 'Views' list element dhundh liya aur verify kar liya!");
+        System.out.println("✅ Verification Successful: 'Views' text element dhundh liya aur verify kar liya!");
     }
 
     @AfterClass
