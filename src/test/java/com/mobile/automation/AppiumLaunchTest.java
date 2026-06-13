@@ -37,7 +37,7 @@ public class AppiumLaunchTest {
     public void verifyApiDemosHomeLayout() {
         System.out.println("🥳 Success! API Demos app automation se live open ho gayi hai!");
         
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(8));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         
         // 🌟 STEP 1: Android 14 Older Version Warning Popup Bypass
         try {
@@ -49,24 +49,32 @@ public class AppiumLaunchTest {
             );
             alertButton.click();
             System.out.println("✅ Popup Bypassed: Clicked on 'Continue' button successfully!");
-            
-            // Chota sa delay taaki alert hatne ke baad screen refresh ho sake
-            Thread.sleep(2000);
         } catch (Exception e) {
             System.out.println("ℹ️ Older version popup nahi aaya, directly proceeding to main dashboard.");
         }
 
-        // 🌟 STEP 2: Main Dashboard Par 'Views' par click karna
-        System.out.println("🔄 Locating 'Views' element now...");
+        // 🌟 STEP 2: UI Synchronization Buffering
+        // Popup hatne ke baad DOM freeze todne ke liye explicitly 3-4 seconds ka hard sleep zaroori hai Jenkins pe
+        try {
+            System.out.println("⏳ Waiting for Android OS layout hierarchy to fully refresh...");
+            Thread.sleep(4000); 
+        } catch (InterruptedException ie) {
+            // Ignore context intercept
+        }
+
+        // 🌟 STEP 3: Main Dashboard - Dynamic Text Identifier Matching
+        System.out.println("🔄 Locating 'Views' element via native UI scroll scan...");
+        
+        // Is baar hum exact text attribute structure aur pure index mapping ko target karenge
         WebElement viewsElement = wait.until(
-            ExpectedConditions.presenceOfElementLocated(
+            ExpectedConditions.elementToBeClickable(
                 AppiumBy.androidUIAutomator("new UiSelector().text(\"Views\")")
             )
         );
         
-        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element match nahi ho paya.");
+        Assert.assertNotNull(viewsElement, "Dashboard Error: 'Views' element structure blank mila.");
         viewsElement.click();
-        System.out.println("🎉 SUCCESS: 'Views' folder successfully opened via Automation!");
+        System.out.println("🎉 SUCCESS: Finally 'Views' open ho gaya aur test complete pass hai!");
     }
 
     @AfterClass
