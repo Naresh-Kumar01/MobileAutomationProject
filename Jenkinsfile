@@ -2,20 +2,18 @@ pipeline {
     agent any
 
     tools {
-        // Pakka kar lena ki aapke Jenkins Global Tool Configuration mein Maven ka naam 'Maven3' ya jo bhi ho, wahi yahan likha ho
         maven 'Maven3'
         jdk 'Java17'
     }
 
     environment {
-        // Aapke execution ki bypass command
-        TEST_COMMAND = "mvn clean test -Dtest=MobileAutomationPipelineTest"
+        // Yahan bypass command daal dijiye jo direct test class ko run karegi bina XML ke
+        TEST_COMMAND = "mvn test -Dtest=MobileAutomationPipelineTest"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Yeh stage GitHub se aapka fresh code pull karega
                 checkout scm
                 echo "Bhai, GitHub se fresh code pull ho gaya hai!"
             }
@@ -23,7 +21,6 @@ pipeline {
 
         stage('Verify Environment') {
             steps {
-                // Java aur Maven ka version check karna safetly ke liye
                 bat 'java -version'
                 bat 'mvn -version'
             }
@@ -32,7 +29,6 @@ pipeline {
         stage('Run Mobile Automation Tests') {
             steps {
                 echo "🚀 Appium Automation Test Flow Shuru Ho Raha Hai..."
-                // Windows machine ke liye 'bat' command use hoti hai
                 bat "${TEST_COMMAND}"
             }
         }
@@ -41,7 +37,7 @@ pipeline {
     after {
         always {
             echo "--- Pipeline Execution Poora Hua ---"
-            // TestNG ke reports ko archive karna taaki Jenkins dashboard par dikhe
+            // Jab test bina XML ke chalega toh junit reports archive karne ke liye is line ko rehte dete hain
             junit '**/target/surefire-reports/*.xml'
         }
         success {
