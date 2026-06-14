@@ -2,57 +2,53 @@ pipeline {
     agent any
 
     tools {
-        // Ensure aapke Jenkins mein Maven 'M3' ya jo bhi naam aapne Global Tool Configuration mein diya hai, woh mapped ho
-        maven 'M3'
+        // Pakka kar lena ki aapke Jenkins Global Tool Configuration mein Maven ka naam 'Maven3' ya jo bhi ho, wahi yahan likha ho
+        maven 'Maven3'
+        jdk 'Java17'
+    }
+
+    environment {
+        // Aapke execution ki bypass command
+        TEST_COMMAND = "mvn clean test -Dtest=MobileAutomationPipelineTest"
     }
 
     stages {
-        stage('🚀 Checkout Code') {
+        stage('Checkout Code') {
             steps {
-                echo 'Pulling latest automation code from Git...'
+                // Yeh stage GitHub se aapka fresh code pull karega
                 checkout scm
+                echo "Bhai, GitHub se fresh code pull ho gaya hai!"
             }
         }
 
-        stage('⚡ Check & Start Appium Server') {
+        stage('Verify Environment') {
             steps {
-                script {
-                    echo 'Checking if Appium Server is already running on port 4723...'
-                    // Windows par check karega ki port 4723 busy hai ya nahi, nahi hai toh Appium background mein start karega
-                    bat """
-                        netstat -ano | findstr 4723 > nul
-                        if %errorlevel% neq 0 (
-                            echo Appium is down. Starting Appium Server in background...
-                            start /B appium
-                            timeout /t 5 > nul
-                        ) else (
-                            echo Appium Server is already up and running!
-                        )
-                    """
-                }
+                // Java aur Maven ka version check karna safetly ke liye
+                bat 'java -version'
+                bat 'mvn -version'
             }
         }
 
-        stage('📲 Run Mobile Automation Tests') {
+        stage('Run Mobile Automation Tests') {
             steps {
-                echo 'Executing Maven Appium Automation Test Suite...'
-                // Humne jo command local par chalayi thi, wahi Jenkins execute karega
-                bat 'mvn clean test'
+                echo "🚀 Appium Automation Test Flow Shuru Ho Raha Hai..."
+                // Windows machine ke liye 'bat' command use hoti hai
+                bat "${TEST_COMMAND}"
             }
         }
     }
 
-    post {
+    after {
         always {
-            echo 'Archiving TestNG Results...'
-            // Surefire reports ko Jenkins dashboard par dekhne ke liye publish karega
+            echo "--- Pipeline Execution Poora Hua ---"
+            // TestNG ke reports ko archive karna taaki Jenkins dashboard par dikhe
             junit '**/target/surefire-reports/*.xml'
         }
         success {
-            echo '🏆 Badhaai ho bhai! Jenkins Pipeline Successful! Mail trigger sending...'
+            echo "🎉 Badhai ho bhai! Jenkins Pipeline ekdum SUCCESS rahi!"
         }
         failure {
-            echo '❌ Automation Build Failed! Checking logs...'
+            echo "❌ Arre yaar, Build Fail ho gayi. Logs check karo!"
         }
     }
 }
