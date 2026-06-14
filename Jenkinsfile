@@ -6,11 +6,6 @@ pipeline {
         jdk 'Java17'
     }
 
-    environment {
-        // Yahan bypass command daal dijiye jo direct test class ko run karegi bina XML ke
-        TEST_COMMAND = "mvn test -Dtest=MobileAutomationPipelineTest"
-    }
-
     stages {
         stage('Checkout Code') {
             steps {
@@ -29,7 +24,8 @@ pipeline {
         stage('Run Mobile Automation Tests') {
             steps {
                 echo "🚀 Appium Automation Test Flow Shuru Ho Raha Hai..."
-                bat "${TEST_COMMAND}"
+                // Yahan direct command hardcode kar di hai bina kisi environment variable ke
+                bat 'mvn test -Dtest=MobileAutomationPipelineTest'
             }
         }
     }
@@ -37,7 +33,6 @@ pipeline {
     after {
         always {
             echo "--- Pipeline Execution Poora Hua ---"
-            // Jab test bina XML ke chalega toh junit reports archive karne ke liye is line ko rehte dete hain
             junit '**/target/surefire-reports/*.xml'
         }
         success {
