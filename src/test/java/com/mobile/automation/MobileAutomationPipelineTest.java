@@ -3,7 +3,7 @@ package com.mobile.automation;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
-import org.testng.AssertJUnit;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -12,7 +12,6 @@ import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
@@ -39,7 +38,8 @@ public class MobileAutomationPipelineTest {
         options.setCapability("appium:fullReset", false);
 
         // 2. Local Appium Server (Port 4723) se connect karna
-        URL serverUrl = new URL("http://127.0.0.1:4723/");
+       // URL serverUrl = new URL("http://127.0.0.1:4723/");
+        URL serverUrl = new URL("http://localhost:4444/wd/hub/");
         driver = new AndroidDriver(serverUrl, options);
 
         // Global implicit wait lagana taaki element load hone ka time mile
