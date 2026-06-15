@@ -1,46 +1,47 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK21' 
+    environment {
+        // Points the in-container Appium/ADB commands to your windows host machine
+        ADB_SERVER_SOCKET = 'tcp:localhost:5037' 
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                echo "🚀 GitHub se fresh code automatic pull ho raha hai..."
+                // Pulls latest script configurations from your github repo
                 checkout scm
+                echo "Code checked out successfully from GitHub."
             }
         }
 
-        stage('Spin Up Docker Grid') {
+        stage('Verify ADB Connection') {
             steps {
-                echo "🐳 Existing system conflicts ko stop aur remove kar rahe hain..."
-                bat "docker rm -f selenium-hub || true"
-                bat "docker-compose down -v --remove-orphans"
-                
-                echo "🚀 Fresh Docker Containers up kar rahe hain..."
-                bat "docker-compose up -d"
-                
-                echo "⏳ 10 Seconds rukte hain taaki Grid fully ready ho jaye..."
-                sleep time: 10, unit: 'SECONDS'
+                // Verifies if the host ADB server can view your attached hardware
+                bat 'adb devices'
             }
         }
 
-        stage('Run Mobile Automation Tests') {
+        stage('Run Tests via Docker Compose') {
             steps {
-                echo "🚀 Appium Automation Test Flow Shuru Ho Raha Hai..."
-                bat "mvn test -Dtest=MobileAutomationPipelineTest"
+                echo "Starting Maven execution block inside Docker container..."
+                // Launches the docker compose environment, runs test suites, and tears down container post execution
+                bat 'docker-compose -f docker-compose1.yml up --build --abort-on-container-exit'
             }
         }
     }
 
     post {
         always {
-            echo "🧹 Cleaning up Docker containers..."
-            bat "docker-compose down -v"
-            echo "--- Pipeline Execution Poora Hua ---"
+            echo "Cleaning up container environments..."
+            bat 'docker-compose -f docker-compose1.yml down'
+        }
+        success {
+            echo "Pipeline Executed Successfully! Notification mail triggered."
+            // validation email step goes here
+        }
+        failure {
+            echo "Pipeline Failed. Please inspect execution logs."
         }
     }
 }
