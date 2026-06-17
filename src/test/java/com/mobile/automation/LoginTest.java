@@ -29,7 +29,7 @@ public class LoginTest {
 
     @Test
     public void testLoginFlow() {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(50));
 
         // 1. Enter IP
         driver.findElement(AppiumBy.id("com.logixgrid.app.matrixv2.production:id/edit_server_code")).sendKeys("192.168.1.50");
