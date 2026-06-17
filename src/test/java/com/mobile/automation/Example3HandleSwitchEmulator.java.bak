@@ -1,0 +1,33 @@
+package com.mobile.automation;
+
+import io.appium.java_client.android.AndroidDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.URL;
+
+public class Example3HandleSwitchEmulator {
+
+    public static void main(String[] args) {
+        try {
+            DesiredCapabilities dc = new DesiredCapabilities();
+            
+            // Capabilities (W3C standard compliance)
+            dc.setCapability("platformName", "Android");
+            dc.setCapability("appium:platformVersion", "14.0");
+            dc.setCapability("appium:deviceName", "emulator-5554");
+            dc.setCapability("appium:automationName", "UiAutomator2");
+            
+            // Yahan tumhara sahi APK path updated hai
+            dc.setCapability("appium:app", "C:\\Users\\Admin\\Downloads\\matrixV2-production-debug_branch_3.4.2_may_28.apk");
+
+            URL serverUrl = new URL("http://127.0.0.1:4723/");
+            AndroidDriver driver = new AndroidDriver(serverUrl, dc);
+
+            System.out.println("Test started successfully!");
+            Thread.sleep(5000); // 5 seconds wait
+            
+            driver.quit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -39,7 +39,7 @@ public class MobileAutomationPipelineTest {
 
         // 2. Local Appium Server (Port 4723) se connect karna
        // URL serverUrl = new URL("http://127.0.0.1:4723/");
-        URL serverUrl = new URL("http://localhost:4444/wd/hub/");
+        URL serverUrl = new URL("http://127.0.0.1:4723/");
         driver = new AndroidDriver(serverUrl, options);
 
         // Global implicit wait lagana taaki element load hone ka time mile
