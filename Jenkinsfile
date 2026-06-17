@@ -2,14 +2,13 @@ pipeline {
     agent any
 
     environment {
-        // Points the in-container Appium/ADB commands to your windows host machine
+        // Host Windows par ADB server ka access ensure karne ke liye
         ADB_SERVER_SOCKET = 'tcp:localhost:5037' 
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Pulls latest script configurations from your github repo
                 checkout scm
                 echo "Code checked out successfully from GitHub."
             }
@@ -17,7 +16,7 @@ pipeline {
 
         stage('Verify ADB Connection') {
             steps {
-                // Verifies if the host ADB server can view your attached hardware
+                // Ensure adb is in your system PATH on the Jenkins agent
                 bat 'adb devices'
             }
         }
@@ -25,7 +24,7 @@ pipeline {
         stage('Run Tests via Docker Compose') {
             steps {
                 echo "Starting Maven execution block inside Docker container..."
-                // Launches the docker compose environment, runs test suites, and tears down container post execution
+                // Build aur run ek saath
                 bat 'docker-compose -f docker-compose1.yml up --build --abort-on-container-exit'
             }
         }
@@ -34,14 +33,15 @@ pipeline {
     post {
         always {
             echo "Cleaning up container environments..."
-            bat 'docker-compose -f docker-compose1.yml down'
+            // Cleanup: remove containers and networks created by compose
+            bat 'docker-compose -f docker-compose1.yml down -v'
         }
         success {
-            echo "Pipeline Executed Successfully! Notification mail triggered."
-            // validation email step goes here
+            echo "Pipeline Executed Successfully!"
         }
         failure {
-            echo "Pipeline Failed. Please inspect execution logs."
+            echo "Pipeline Failed. Please inspect execution logs in Jenkins Console."
+            // Yahan par tum email notification add kar sakte ho
         }
     }
 }
